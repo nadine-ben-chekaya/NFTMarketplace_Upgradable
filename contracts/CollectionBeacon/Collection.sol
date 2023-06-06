@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @dev The current version of the contract.
-string constant CONTRACT_VERSION = "2.0.0";
+string constant CONTRACT_VERSION = "1.0.0";
 
 /// @title MyToken - ERC721 Token Contract with URI Storage
 /// @dev This contract allows users to mint ERC721 tokens with unique token URIs.

@@ -1,14 +1,15 @@
 const {ethers} = require("hardhat");
 const Marketplacejson= require("../artifacts/contracts/NFTMarketplace.sol/NFTMarketplace.json");
-//const contractadr= process.env.CONTRACT_ADDRESS_MARKET;
-const contractadr= "0xfA8Df01C35b6ce524190882008Bc39F356F96999";
+const Marketadr= process.env.CONTRACT_ADDRESS_MARKET;
+const Factoryjson= require("../artifacts/contracts/CollectionBeacon/CollectionFactory.sol/CollectionFactory.json");
+const Factoryadr= process.env.CONTRACT_ADDRESS_FACTORY;
 async function main(){
     const owner = await ethers.getSigner();
     console.log("owner=",owner.address);
     //Configuration
     const alchemy= new ethers.providers.AlchemyProvider("maticmum",process.env.ALCHEMY_API_KEY);
     const userwallet= new ethers.Wallet(process.env.PRIVATE_KEY_ACCOUNT1, alchemy);
-    const Contract= new ethers.Contract(contractadr,Marketplacejson.abi,userwallet);
+    const Contract= new ethers.Contract(Marketadr,Marketplacejson.abi,userwallet);
 
     //Transactions
     const gasPriceOracle = "https://gasstation-mainnet.matic.network";
@@ -20,10 +21,15 @@ async function main(){
 
     const listingfees = await Contract.getListingPrice();
     console.log("listing fees=", listingfees);
-    
-    const estimate= await Contract.estimateGas.createMarketItem("0x6113a6Fd9b91E26C7a793C57fA34913fa19F426a", 3, defaultNftPrice);
+
+    //Get Collection Address 
+    //Configuration
+    const factoryContract= new ethers.Contract(Factoryadr,Factoryjson.abi,userwallet);
+    const collectionaddress = await factoryContract.getCollectionAdr(1);
+
+    const estimate= await Contract.estimateGas.createMarketItem(collectionaddress, 3, defaultNftPrice);
     console.log("estimate=", estimate);
-    const tx = await Contract.createMarketItem("0x6113a6Fd9b91E26C7a793C57fA34913fa19F426a", 3, defaultNftPrice, {gasPrice: gasPrice,
+    const tx = await Contract.createMarketItem(collectionaddress, 3, defaultNftPrice, {gasPrice: gasPrice,
         gasLimit: estimate.mul(6),});
     const rc = await tx.wait();
     console.log("result=", rc);

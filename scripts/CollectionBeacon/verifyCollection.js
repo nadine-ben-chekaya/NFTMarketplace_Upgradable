@@ -10,8 +10,9 @@ async function main() {
 //   console.log(`Waiting for > 5 confirmation before Contract verification`);
 //   await beacon.deployTransaction.wait(7);
   await hre.run("verify:verify", {
-    address: "0x6113a6Fd9b91E26C7a793C57fA34913fa19F426a",
-    constructorArguments: ["nadine","N"],
+    address: "0x90c5ac5ba737eb2683530580c17884dee7eb2f1d",
+    constructorArguments: [process.env.CONTRACT_ADDRESS_COLLECTION],
+    contract: "contracts/CollectionBeacon/CollectionBeacon.sol:CollectionBeacon"
   });
 
 //contract: "contracts/TestBeacon/Vaultv1.sol:Vaultv1"

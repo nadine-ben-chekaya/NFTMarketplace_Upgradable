@@ -12,6 +12,7 @@ contract CollectionFactory {
 
     mapping(uint256 => address) private collections;
 
+    //Variable's value cannot be changed after it is assigned.
     CollectionBeacon immutable beacon;
 
     constructor(address _vLogic) {
