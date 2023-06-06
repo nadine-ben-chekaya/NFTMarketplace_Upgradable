@@ -27,7 +27,6 @@ async function main(){
 
     //Get Collection Address 
     //Configuration
-
     const factoryContract= new ethers.Contract(Factoryadr,Factoryjson.abi,userwallet);
     const collectionaddress = await factoryContract.getCollectionAdr(1);
     

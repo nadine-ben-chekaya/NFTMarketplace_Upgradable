@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @dev The current version of the contract.
-string constant CONTRACT_VERSION = "1.0.0";
+string constant CONTRACT_VERSION = "2.0.0";
 
 /// @title MyToken - ERC721 Token Contract with URI Storage
 /// @dev This contract allows users to mint ERC721 tokens with unique token URIs.
@@ -53,6 +53,10 @@ contract Collection is ERC721URIStorageUpgradeable {
     /// @return The version string of the contract.
     function getVersion() external pure returns (string memory) {
         return CONTRACT_VERSION;
+    }
+
+    function getMessage() external pure returns(string memory){
+        return "Hi!!, this is a message from the new version of collection SC";
     }
 
     /**
