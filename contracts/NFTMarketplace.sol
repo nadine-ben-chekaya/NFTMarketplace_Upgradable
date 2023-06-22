@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 
 /// @dev The current version of the contract.
-string constant CONTRACT_VERSION = "1.0.0";
+string constant CONTRACT_VERSION = "2.0.0";
 
 /// @title NFTMarketplace - Marketplace Contract for NFTs
 /// @dev This contract allows users to create, buy, sell, and cancel listings for NFTs.
@@ -89,9 +89,9 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
       address nftContract,
       uint256 tokenId,
       uint256 price
-    ) public payable nonReentrant {
+      ) public payable nonReentrant {
       require(price > 0, "Price must be at least 1 wei");
-      //require(msg.value == listingPrice, "Price must be equal to listing price");
+      require(msg.value == listingPrice, "Must send listing price");
     
 
       idToMarketItem[tokenId] =  MarketItem(
@@ -104,6 +104,7 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
       );
 
       IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+      payable(owner).transfer(msg.value);
       emit MarketItemCreated(
         tokenId,
         nftContract,
@@ -124,7 +125,7 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
       uint256 tokenId
       ) public payable nonReentrant{
       uint price = idToMarketItem[tokenId].price;
-      //require(msg.value == price, "Please submit the asking price in order to complete the purchase");
+      require(msg.value == price, "Please submit the asking price in order to complete the purchase");
     
       address seller= idToMarketItem[tokenId].seller;
       payable(seller).transfer(msg.value);
@@ -147,14 +148,17 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
     /// @param nftContract The address of the NFT contract.
     /// @param tokenId The ID of the NFT.
     /// @param price The price of the NFT.
-    function createMarketResell(address nftContract, uint256 tokenId, uint256 price) public payable nonReentrant {
+    function createMarketResell(
+      address nftContract,
+      uint256 tokenId,
+      uint256 price) public payable nonReentrant {
       require(IERC721(nftContract).ownerOf(tokenId) == msg.sender, "NFT not yours");
-      require(idToMarketItem[tokenId].inSale == false, "NFT already listed");
       require(price > 0, "Amount must be higher than 0");
-      require(msg.value == listingPrice, "Please transfer 0.0025 crypto to pay listing fee");
+      require(msg.value == listingPrice, "Please transfer crypto to pay listing fee");
       
       idToMarketItem[tokenId] =  MarketItem(tokenId,nftContract, payable(msg.sender), payable(address(this)), price, false);
       IERC721(nftContract).transferFrom(msg.sender, address(this), tokenId);
+      payable(owner).transfer(msg.value);
       // change owner, seller, inSale
       emit MarketItemInSale(
         tokenId,
@@ -166,7 +170,9 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
     /// @dev Cancels the sale of a marketplace item.
     /// @param nftContract The address of the NFT contract.
     /// @param tokenId The ID of the NFT.
-    function cancelSale(address nftContract, uint256 tokenId) public nonReentrant {
+    function cancelSale(
+      address nftContract,
+      uint256 tokenId) public nonReentrant {
       require(idToMarketItem[tokenId].seller == msg.sender, "NFT not yours");
       IERC721(nftContract).transferFrom(address(this), msg.sender, tokenId);
       delete idToMarketItem[tokenId];
@@ -177,24 +183,6 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
     
     }
 
-    // /* Get All items of a marketplace item */
-    // function fetchMarketItems() public view returns (MarketItem[] memory) {
-    //   uint itemCount = _itemIds.current();
-    //   uint uninSaleItemCount = _itemIds.current() - _itemsinSale.current();
-    //   uint currentIndex = 0;
-
-    //   MarketItem[] memory items = new MarketItem[](uninSaleItemCount);
-    //   for (uint i = 0; i < itemCount; i++) {
-    //     if (idToMarketItem[i + 1].owner == address(this)) {
-    //       uint currentId = i + 1;
-    //       MarketItem storage currentItem = idToMarketItem[currentId];
-    //       items[currentIndex] = currentItem;
-    //       currentIndex += 1;
-    //     }
-    //   }
-    //   return items;
-    // }
-    
     /// @dev Authorizes the contract upgrade.
     /// @param newImplementation The address of the new implementation contract.
     function _authorizeUpgrade(address newImplementation) internal override {}
@@ -206,9 +194,10 @@ contract NFTMarketplace is  Initializable, UUPSUpgradeable, ReentrancyGuardUpgra
         return CONTRACT_VERSION;
     }
 
-    function getMessage() external pure returns(string memory){
-        return "ugrade new imp";
+    function getOwner() external view returns(address){
+        return owner;
     }
+
 
     /**
      * @dev This empty reserved space is put in place to allow future versions to add new

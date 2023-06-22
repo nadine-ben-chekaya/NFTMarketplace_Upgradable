@@ -2,6 +2,7 @@ require("@nomicfoundation/hardhat-toolbox");
 require("@openzeppelin/hardhat-upgrades");
 require("@nomiclabs/hardhat-ethers");
 require("@nomiclabs/hardhat-etherscan");
+require("solidity-coverage");
 //require("../node_modules/@openzeppelin/contracts-upgradeable");
 require("dotenv").config();
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -19,7 +20,7 @@ module.exports = {
       runs: 200
     },
   },
-  defaultNetwork: "mumbai",
+  defaultNetwork: "hardhat",
   networks: {
     mumbai:{
       url: ALCHEMY_MUMBAI_API_URL,
